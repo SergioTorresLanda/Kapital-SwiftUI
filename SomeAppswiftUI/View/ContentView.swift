@@ -13,7 +13,7 @@ struct ContentView: View {
     @State private var viewmodel: MyViewModel? //opcional por ser "late init"
     
     var body: some View {
-        ZStack {
+        ZStack{
             if let vm = viewmodel {
                 if vm.isLoading{
                     ProgressView()
@@ -40,8 +40,7 @@ struct ContentView: View {
                     }
                 }
             }
-        }
-        .task {//async work
+        }.task {//async work
             do {
                 try await viewmodel?.fetchData()
             } catch {

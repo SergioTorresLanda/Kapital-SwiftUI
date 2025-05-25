@@ -30,7 +30,7 @@ class AmiiboRepository: AmiiboRepositoryProtocol {
     func fetchAndPersistAmiibos() async throws {
 
         guard let apiURL = url else { throw URLError(.badURL) }
-        let (data, response) = try await URLSession.shared.data(from: apiURL)
+        let (data, _) = try await URLSession.shared.data(from: apiURL)
         // ... (Error handling and decoding) ...
         let resp = try JSONDecoder().decode(AmiiboResp.self, from: data)
 
@@ -39,7 +39,7 @@ class AmiiboRepository: AmiiboRepositoryProtocol {
             // Revisar si ya se guardo para no guardar duplicados..
             do {
                 let existing = try modelContext.fetch(FetchDescriptor<AmiiboObj>(predicate: #Predicate { $0.tail == apiAmiibo.tail }))
-                if let existingAmiibo = existing.first {
+                if let _ = existing.first {
                     //de momento no hace falta hacer nada si encuentra un duplicado
                 } else {
                     let newAmiiboObj = AmiiboObj(amiiboObj: apiAmiibo)
@@ -61,7 +61,7 @@ class AmiiboRepository: AmiiboRepositoryProtocol {
     func addFavorite(_ amiibo: AmiiboObj) {
         amiibo.isFavorite = true
         // No need to insert if it's already in the context. Just modify and save.
-        modelContext.insert(amiibo)
+        //modelContext.insert(amiibo)
         try? modelContext.save() // If you want to force save immediately
     }
 

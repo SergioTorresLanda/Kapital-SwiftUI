@@ -9,10 +9,10 @@ import Foundation
 import SwiftUI
 
 struct CardView: View {
-    @State var amiibo: AmiiboObj
-    @State var viewmodel: MyViewModel
-    @State private var didTap:Bool = false
+    var amiibo: AmiiboObj
+    var viewmodel: MyViewModel
     @State var isInFavoritesList = false
+    @State private var active:Bool = false
     
     var body: some View {
         HStack{
@@ -26,20 +26,21 @@ struct CardView: View {
             .frame(width: 90, height: 90)
             .clipShape(.rect(cornerRadius: 25))
             Spacer()
-            !isInFavoritesList ? //configure favorite button actions
-            Button{
-                didTap.toggle()
-                saveToOrRemoveFromFavorites()
-            } label: {
-                Image(systemName: "heart.fill")
-            }.background(Color.black)
-                .foregroundColor(didTap ? Color.red : Color.white)
-            :  // is in favorite list, configure static button as Image
+            isInFavoritesList ?
             Button{
             } label: {
                 Image(systemName: "heart.fill")
             }.background(Color.black)
                 .foregroundColor(Color.red)
+            :  // Si no estoy en la lista de favoritos, que el boton funcione.
+            Button{
+                active ? viewmodel.deleteFavoriteFromSD(id: amiibo.id) : viewmodel.addFavoriteToSD(with: amiibo)
+                active.toggle()
+            } label: {
+                Image(systemName: "heart.fill")
+            }.background(Color.black)
+                .foregroundColor(active ? Color.red : Color.white)
+           
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding()
@@ -49,9 +50,6 @@ struct CardView: View {
         .listRowSeparator(.hidden)
     }
     
-    func saveToOrRemoveFromFavorites(){
-        didTap ? viewmodel.addFavoriteToSD(with: amiibo) : viewmodel.deleteFavoriteFromSD(id: amiibo.id)
-    }
 }
 /*
 struct CardView_Previews: PreviewProvider {
