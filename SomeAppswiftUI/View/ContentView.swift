@@ -48,9 +48,14 @@ struct ContentView: View {
             }
         }
         .onAppear{
-            // Initialize ViewModel here using the environment's modelContext
-            if viewmodel == nil { // Initialize only once
-                viewmodel = MyViewModel(repository: AmiiboRepository(modelContext: modelContext))
+            if viewmodel == nil { // Inicializar solo una vez todo el esquema del ViewModel usando la variable ambiental "modelContext"
+                viewmodel = MyViewModel(
+                    repository: AmiiboRepository(
+                        remoteDataSource: RemoteAmiiboDataSource(),
+                        localDataSource: LocalAmiiboDataSource(
+                            modelContext: modelContext)
+                    )
+                )
             }
         }
         .onDisappear{

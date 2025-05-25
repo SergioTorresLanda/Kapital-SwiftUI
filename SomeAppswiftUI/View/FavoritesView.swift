@@ -34,6 +34,7 @@ struct FavoritesView: View {
         }
         .listStyle(.plain)
         .navigationTitle("Favoritos:  \(viewmodel.favs.count)")
+        .navigationBarTitleDisplayMode(.large)
         .task {
         }
         .onAppear{
