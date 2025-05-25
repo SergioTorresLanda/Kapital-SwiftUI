@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		4438933C2DE28D520096354A /* AmiiboRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4438933B2DE28D520096354A /* AmiiboRepository.swift */; };
 		44690D162DE170C8008F26A1 /* SomeAppswiftUIApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44690D152DE170C8008F26A1 /* SomeAppswiftUIApp.swift */; };
 		44690D182DE170C8008F26A1 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44690D172DE170C8008F26A1 /* ContentView.swift */; };
 		44690D1A2DE170CC008F26A1 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 44690D192DE170CC008F26A1 /* Assets.xcassets */; };
@@ -17,9 +18,9 @@
 		44690D432DE17301008F26A1 /* MyViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44690D422DE17301008F26A1 /* MyViewModel.swift */; };
 		44690D452DE17524008F26A1 /* AmiiboModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44690D442DE17524008F26A1 /* AmiiboModel.swift */; };
 		44690D472DE1776F008F26A1 /* CardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44690D462DE1776F008F26A1 /* CardView.swift */; };
-		44690D482DE1776F008F26A1 /* CardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44690D462DE1776F008F26A1 /* CardView.swift */; };
-		44690D492DE1776F008F26A1 /* CardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44690D462DE1776F008F26A1 /* CardView.swift */; };
 		44690D4F2DE18AE2008F26A1 /* SomeExtraView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44690D4E2DE18AE2008F26A1 /* SomeExtraView.swift */; };
+		44B06CC82DE2512200372FFA /* ObjetoPersistencia.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44B06CC72DE2512200372FFA /* ObjetoPersistencia.swift */; };
+		44B06CCB2DE2598D00372FFA /* FavoritesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44B06CCA2DE2598D00372FFA /* FavoritesView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -40,6 +41,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		4438933B2DE28D520096354A /* AmiiboRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AmiiboRepository.swift; sourceTree = "<group>"; };
 		44690D122DE170C8008F26A1 /* SomeAppswiftUI.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SomeAppswiftUI.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		44690D152DE170C8008F26A1 /* SomeAppswiftUIApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SomeAppswiftUIApp.swift; sourceTree = "<group>"; };
 		44690D172DE170C8008F26A1 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -54,6 +56,8 @@
 		44690D442DE17524008F26A1 /* AmiiboModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AmiiboModel.swift; sourceTree = "<group>"; };
 		44690D462DE1776F008F26A1 /* CardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardView.swift; sourceTree = "<group>"; };
 		44690D4E2DE18AE2008F26A1 /* SomeExtraView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SomeExtraView.swift; sourceTree = "<group>"; };
+		44B06CC72DE2512200372FFA /* ObjetoPersistencia.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ObjetoPersistencia.swift; sourceTree = "<group>"; };
+		44B06CCA2DE2598D00372FFA /* FavoritesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoritesView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -143,6 +147,7 @@
 			isa = PBXGroup;
 			children = (
 				44690D422DE17301008F26A1 /* MyViewModel.swift */,
+				4438933B2DE28D520096354A /* AmiiboRepository.swift */,
 			);
 			path = ViewModel;
 			sourceTree = "<group>";
@@ -153,6 +158,7 @@
 				44690D172DE170C8008F26A1 /* ContentView.swift */,
 				44690D462DE1776F008F26A1 /* CardView.swift */,
 				44690D4E2DE18AE2008F26A1 /* SomeExtraView.swift */,
+				44B06CCA2DE2598D00372FFA /* FavoritesView.swift */,
 			);
 			path = View;
 			sourceTree = "<group>";
@@ -161,6 +167,7 @@
 			isa = PBXGroup;
 			children = (
 				44690D442DE17524008F26A1 /* AmiiboModel.swift */,
+				44B06CC72DE2512200372FFA /* ObjetoPersistencia.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -299,8 +306,11 @@
 				44690D162DE170C8008F26A1 /* SomeAppswiftUIApp.swift in Sources */,
 				44690D452DE17524008F26A1 /* AmiiboModel.swift in Sources */,
 				44690D432DE17301008F26A1 /* MyViewModel.swift in Sources */,
+				44B06CCB2DE2598D00372FFA /* FavoritesView.swift in Sources */,
 				44690D472DE1776F008F26A1 /* CardView.swift in Sources */,
 				44690D4F2DE18AE2008F26A1 /* SomeExtraView.swift in Sources */,
+				44B06CC82DE2512200372FFA /* ObjetoPersistencia.swift in Sources */,
+				4438933C2DE28D520096354A /* AmiiboRepository.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -308,7 +318,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				44690D482DE1776F008F26A1 /* CardView.swift in Sources */,
 				44690D272DE170CD008F26A1 /* SomeAppswiftUITests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -318,7 +327,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				44690D332DE170CD008F26A1 /* SomeAppswiftUIUITestsLaunchTests.swift in Sources */,
-				44690D492DE1776F008F26A1 /* CardView.swift in Sources */,
 				44690D312DE170CD008F26A1 /* SomeAppswiftUIUITests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

@@ -51,7 +51,7 @@ struct ContentView: View {
         .onAppear{
             // Initialize ViewModel here using the environment's modelContext
             if viewmodel == nil { // Initialize only once
-                viewmodel = MyViewModel(modelContext: modelContext)
+                viewmodel = MyViewModel(repository: AmiiboRepository(modelContext: modelContext))
             }
         }
         .onDisappear{

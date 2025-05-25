@@ -20,7 +20,8 @@ protocol AmiiboRepositoryProtocol {
 
 class AmiiboRepository: AmiiboRepositoryProtocol {
     private var modelContext: ModelContext
-    private let uRL = URL(string: "https://www.amiiboapi.com/api/amiibo/")
+    //Guarda el contexto. Esta es la capa entre el almacén de persistencia y los objetos en la memoria.
+    private let url = URL(string: "https://www.amiiboapi.com/api/amiibo/")
 
     init(modelContext: ModelContext) {
         self.modelContext = modelContext
@@ -28,7 +29,7 @@ class AmiiboRepository: AmiiboRepositoryProtocol {
 
     func fetchAndPersistAmiibos() async throws {
 
-        guard let apiURL = uRL else { throw URLError(.badURL) }
+        guard let apiURL = url else { throw URLError(.badURL) }
         let (data, response) = try await URLSession.shared.data(from: apiURL)
         // ... (Error handling and decoding) ...
         let resp = try JSONDecoder().decode(AmiiboResp.self, from: data)
@@ -49,18 +50,19 @@ class AmiiboRepository: AmiiboRepositoryProtocol {
             }
         }
     }
-
-    func addFavorite(_ amiibo: AmiiboObj) {
-        amiibo.isFavorite = true
-        // No need to insert if it's already in the context. Just modify and save.
-        try? modelContext.save() // If you want to force save immediately
-    }
-
+    
     func deleteAmiibos(at offsets: IndexSet, in amiibos: [AmiiboObj]) {
         for index in offsets {
             modelContext.delete(amiibos[index])
         }
         try? modelContext.save()
+    }
+
+    func addFavorite(_ amiibo: AmiiboObj) {
+        amiibo.isFavorite = true
+        // No need to insert if it's already in the context. Just modify and save.
+        modelContext.insert(amiibo)
+        try? modelContext.save() // If you want to force save immediately
     }
 
     func deleteFavorite(id: String, in favs: [AmiiboObj]) {
