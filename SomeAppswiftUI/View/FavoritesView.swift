@@ -19,7 +19,7 @@ struct FavoritesView: View {
             ForEach(viewmodel.favs, id: \.id) { card in
                 CardView(amiibo: card,
                          viewmodel: viewmodel,
-                         isInFavoritesList: true //Not redundant as far as I see, I need to pass this to CardView() si it knows im in favorites section and disable the "favorites" button. when CardView() ins getting instansiated from ContentView() this property is the default value (false)
+                         isInFavoritesList: true
                 )
                 .onTapGesture {
                     showingDetail.toggle()

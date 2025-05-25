@@ -26,13 +26,13 @@ struct CardView: View {
             .frame(width: 90, height: 90)
             .clipShape(.rect(cornerRadius: 25))
             Spacer()
-            isInFavoritesList ?
+            isInFavoritesList ? // Si estoy en la lista de favoritos, que el botón no funcione y sea estatico (imagen).
             Button{
             } label: {
                 Image(systemName: "heart.fill")
             }.background(Color.black)
                 .foregroundColor(Color.red)
-            :  // Si no estoy en la lista de favoritos, que el boton funcione.
+            :  // Si no estoy en la lista de favoritos, que el botón funcione.
             Button{
                 active ? viewmodel.deleteFavoriteFromSD(id: amiibo.id) : viewmodel.addFavoriteToSD(with: amiibo)
                 active.toggle()
@@ -49,14 +49,4 @@ struct CardView: View {
                                          style: .continuous))
         .listRowSeparator(.hidden)
     }
-    
 }
-/*
-struct CardView_Previews: PreviewProvider {
-    static var previews: some View {
-        CardView(cardTitle: "Mario - Super Smash", 
-                 image: "https://raw.githubusercontent.com/N3evin/AmiiboAPI/master/images/icon_04380001-03000502.png")
-            .padding()
-            .previewLayout(.sizeThatFits)
-    }
-}*/

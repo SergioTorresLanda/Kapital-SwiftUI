@@ -15,17 +15,17 @@ struct SomeAppswiftUIApp: App {
     
     init() {
         do {
-            // Check for UI test launch argument to reset data
+            // Revisa los launch arguments para resetear la data (si es UITest)
             if CommandLine.arguments.contains("-resetSwiftData") {
                 let path = URL.applicationSupportDirectory.appending(path: "default.store")
-                // Delete the store file if it exists
+                // Borra el archivo en memoria si existe
                 if FileManager.default.fileExists(atPath: path.path) {
                     try FileManager.default.removeItem(at: path)
                     print("SwiftData store reset for UI testing.")
                 }
             }
 
-            // Then create your container
+            //Crea el contenedor
             container = try ModelContainer(for: AmiiboObj.self)
         } catch {
             fatalError("Failed to create ModelContainer: \(error.localizedDescription)")
@@ -36,6 +36,6 @@ struct SomeAppswiftUIApp: App {
         WindowGroup {
             ContentView()
         }.modelContainer(container)
-        //aqui se crea el contenedor que persiste la Data localmente.
+        //aqui se pega el contenedor que persiste la Data localmente a la ventana-escena-app-contexto global.
     }
 }

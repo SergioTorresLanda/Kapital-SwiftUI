@@ -13,9 +13,9 @@ import SwiftUI
 final class MyViewModel {
     
     private let repository: AmiiboRepositoryProtocol // Injeccion de dependencia abstracta
-    var amiibos: [AmiiboObj] = [] //data pública guardada localmente
-    var favs: [AmiiboObj] = [] //favoritos guardados localmente
-    private(set) var isLoading = false //propiedad para menejar el estado del ActivityIndicator
+    var amiibos: [AmiiboObj] = [] //Data pública guardada localmente listos para presentar a la vista
+    var favs: [AmiiboObj] = [] //Favoritos guardados localmente listos para presentar a la vista
+    private(set) var isLoading = false //propiedad para menejar el estado del ActivityIndicator (en la vista)
     
     //Se inyecta el contexto al inicializarse el viewmodel
     init(repository:AmiiboRepositoryProtocol) {
@@ -27,8 +27,8 @@ final class MyViewModel {
        isLoading = true
        defer { isLoading = false }
        try await repository.fetchAndPersistAmiibos()
-       fetchAmiibos() // Refresh ViewModel's lists after persistence
-       fetchFavs()
+       fetchAmiibos()
+       fetchFavs() // Actualizar las listas del Viewmodel despues de guardarlas la data localmente.
    }
     // MARK: Actualizar la propiedad que vera la vista, usando de la data guardada en local como fuente de verdad.
     func fetchAmiibos() {
@@ -60,12 +60,12 @@ final class MyViewModel {
         repository.addFavorite(amiibo)
         fetchFavs()
     }
-    // Eliminar favoritos
+    // Eliminar de favoritos desde la lista general (boton favorito)
     func deleteFavoriteFromSD(id: String) {
         repository.deleteFavorite(id: id, in: favs)
         fetchFavs()
     }
-    
+    // Eliminar de favoritos desde la lista de favoritos (accion de eliminar)
     func deleteFavoriteFromIndex(at offsets: IndexSet) {
         repository.deleteFavorites(at: offsets, in: favs)
         fetchFavs()

@@ -23,7 +23,6 @@ class AmiiboRepository: AmiiboRepositoryProtocol {
     private let remoteDataSource: RemoteAmiiboDataSourceProtocol
     private let localDataSource: LocalAmiiboDataSourceProtocol
 
-    //Guarda el contexto. Esta es la capa entre el almacén de persistencia y los objetos en la memoria.
     private let url = URL(string: "https://www.amiiboapi.com/api/amiibo/")
 
     init(remoteDataSource: RemoteAmiiboDataSourceProtocol, localDataSource: LocalAmiiboDataSourceProtocol) {

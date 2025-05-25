@@ -9,97 +9,82 @@ import XCTest
 import SwiftData
 @testable import SomeAppswiftUI
 
-final class SomeAppswiftUITests: XCTestCase {
+final class MyViewModelTests: XCTestCase {
     
-    var modelContext: ModelContext!
-    var viewModel: MyViewModel!
-    var repository: AmiiboRepositoryProtocol!
-    var remoteDataSource: RemoteAmiiboDataSourceProtocol!
-    var localDatasource: LocalAmiiboDataSourceProtocol!
+      var viewModel: MyViewModel!
+      var mockRemoteDataSource: MockRemoteAmiiboDataSource!
+      var mockLocalDataSource: MockLocalAmiiboDataSource!
+      var amiiboRepository: AmiiboRepositoryProtocol!
 
     override func setUpWithError() throws {
-        // Create an in-memory store for each test
+        // Se Crea un almacén en memoria para cada prueba (util si la simulación de LocalDataSource usa internamente un ModelContext real o si se quiere verificar el comportamiento de persistencia a través de la simulación).
         let config = ModelConfiguration(isStoredInMemoryOnly: true)
         let container = try ModelContainer(for: AmiiboObj.self, configurations: config)
-        modelContext = ModelContext(container)
-        
-        // Use a real AmiiboRepository with the in-memory context for this test
-        // (You might mock this too if you only want to test ViewModel logic, not persistence)
-        
-        repository = MockDataService(modelContext:modelContext) // Assuming AmiiboRepository init with ModelContext
-        viewModel = MyViewModel(repository: repository)
+ 
+        mockRemoteDataSource = MockRemoteAmiiboDataSource()
+        mockLocalDataSource = MockLocalAmiiboDataSource()
+        // InicializarAmiiboRepository con DataSource mocks
+        amiiboRepository = AmiiboRepository(
+            remoteDataSource: mockRemoteDataSource,
+            localDataSource: mockLocalDataSource)
+        // Inicializar VM con este AmiiboRepository
+        viewModel = MyViewModel(repository: amiiboRepository)
     }
 
     override func tearDownWithError() throws {
-        modelContext = nil
-        viewModel = nil
-        repository = nil    }
-
-    func testExample() throws {
-        //Given
-        //When
-
+       viewModel = nil
+       mockRemoteDataSource = nil
+       mockLocalDataSource = nil
+       amiiboRepository = nil
     }
     
     func testService() async throws {
-        //Given
-        let config = ModelConfiguration(isStoredInMemoryOnly: true)
-        let container = try ModelContainer(for: AmiiboObj.self, configurations: config)
-        let users = [Amiibo.dummy]
-        //When
-        let mockService = MockDataService(modelContext: ModelContext(container))
-        let vm = MyViewModel(repository: mockService)
-        try await vm.fetchData()
-        //Then
-        XCTAssertFalse(vm.amiibos.isEmpty)
+        // Given: El mockRemoteDataSource regresa el dummy amiibo
+        mockRemoteDataSource.amiibosToReturn = [.dummy]
+
+        // When: Se busca data
+        try await viewModel.fetchData()
+
+        // Then: El array del Vm debe tener el dummy amiibo
+        XCTAssertFalse(viewModel.amiibos.isEmpty, "ViewModel amiibos should not be empty")
+        XCTAssertEqual(viewModel.amiibos.count, 1, "ViewModel should have 1 amiibo")
+        XCTAssertEqual(viewModel.amiibos.first?.name, Amiibo.dummy.name, "The fetched amiibo should be the dummy one")
     }
     
     func testAddAndFetchFavorite() async throws {
-      // Given: An amiibo object (not yet favorited)
-      let amiibo = AmiiboObj(amiiboObj: .dummy) // Your AmiiboObj dummy
-      XCTAssertFalse(amiibo.isFavorite ?? true, "Amiibo should initially not be a favorite")
-
-      // Insert the amiibo into the context so it can be managed
-      modelContext.insert(amiibo)
-
-      // When: We add it to favorites via the ViewModel
-      viewModel.addFavoriteToSD(with: amiibo) // This sets isFavorite and fetches favs
-
-        // Then:
-        // 1. The original amiibo object's favorite status should be true
-        XCTAssertTrue(amiibo.isFavorite ?? false, "AmiiboObj should be marked as favorite")
-        
-        // 2. The ViewModel's favs list should contain this amiibo
-        XCTAssertFalse(viewModel.favs.isEmpty, "Favorites list should not be empty")
-        XCTAssertEqual(viewModel.favs.first?.id, amiibo.id, "Favorite list should contain the added amiibo") //Failing test
-        
-        // 3. The main amiibos list should still contain it (if it wasn't filtered)
-        XCTAssertFalse(viewModel.amiibos.isEmpty, "Main list should not be empty")
-        XCTAssertEqual(viewModel.amiibos.first?.id, amiibo.id, "Main list should still contain the amiibo") //Failing test
+        // Given: Dado un dummy amiibo que va a ser agregado a favoritos
+       let amiiboToAdd = AmiiboObj(amiiboObj: .dummy)
+       // Llenar el mock de Data local con el dummy
+       try mockLocalDataSource.insertOrUpdate(amiibos: [Amiibo.dummy])
+       // When: Lo agregamos a favoritos..
+       viewModel.addFavoriteToSD(with: amiiboToAdd)
+       // Then:
+       // 1. EL mockDataSource local debe reflejar el cambio
+       XCTAssertTrue(mockLocalDataSource.storedAmiibos.first(where: { $0.id == amiiboToAdd.id })?.isFavorite ?? false, "Amiibo should be marked as favorite in mock local storage")
+       
+       // 2. El ViewModel's favs array debe contener este amiibo
+       XCTAssertFalse(viewModel.favs.isEmpty, "Favorites list should not be empty")
+       XCTAssertEqual(viewModel.favs.first?.id, amiiboToAdd.id, "Favorite list should contain the added amiibo")
+      
   }
     
     func testDeleteFavorite() async throws {
-        // Given: A favorited amiibo already in the context and ViewModel's favs list
-        let amiibo = AmiiboObj(amiiboObj: .dummy)
-        amiibo.isFavorite = true // Manually set as favorite
-        modelContext.insert(amiibo)
+        // Given:
+        let amiiboToDelete = AmiiboObj(amiiboObj: .dummy)
+        amiiboToDelete.isFavorite = true
         
-        // Refresh ViewModel's state
+        mockLocalDataSource.storedAmiibos.append(amiiboToDelete)
+        
         viewModel.fetchFavs()
         XCTAssertFalse(viewModel.favs.isEmpty, "Favorites list should not be empty initially")
         
-        // When: We delete it from favorites
-        viewModel.deleteFavoriteFromSD(id: amiibo.id) // This deletes from persistence
+        // When:
+        viewModel.deleteFavoriteFromSD(id: amiiboToDelete.id)
 
-        // Then: The ViewModel's favs list should be empty
+        // Then:
+        XCTAssertTrue(mockLocalDataSource.storedAmiibos.filter({ $0.isFavorite ?? false }).isEmpty, "Amiibo should be deleted from mock local favorites storage")
+
         XCTAssertTrue(viewModel.favs.isEmpty, "Favorites list should be empty after deletion")
-        
-        // Verify it's actually deleted from the persistence layer
-     //   let descriptor = FetchDescriptor<AmiiboObj>(predicate: #Predicate { $0.id == amiibo.id })
-        //Failing here: Cannot convert value of type 'PredicateExpressions.Equal<PredicateExpressions.KeyPath<PredicateExpressions.Variable<AmiiboObj>, String>, PredicateExpressions.KeyPath<PredicateExpressions.Value<AmiiboObj>, String>>' to closure result type 'any StandardPredicateExpression<Bool>'
-       // let fetchedAmiibos = try modelContext.fetch(descriptor)
-     //   XCTAssertTrue(fetchedAmiibos.isEmpty, "Amiibo should be deleted from the persistence store")
-     
     }
 
 
@@ -112,44 +97,60 @@ final class SomeAppswiftUITests: XCTestCase {
 
 }
 
-class MockDataService: AmiiboRepositoryProtocol {
-   // private let remoteDataSource: RemoteAmiiboDataSourceProtocol
-   // private let localDataSource: LocalAmiiboDataSourceProtocol
-    let modelContext : ModelContext
-    let mockAmiiboObj = AmiiboObj(amiiboObj: .dummy)
+class MockRemoteAmiiboDataSource: RemoteAmiiboDataSourceProtocol {
+    var amiibosToReturn: [Amiibo] = [.dummy] // Default dummy data
+    var shouldThrowError: Bool = false
 
-    init(modelContext: ModelContext) {
-        self.modelContext = modelContext
+    func fetchAmiibosFromAPI() async throws -> [Amiibo] {
+        if shouldThrowError {
+            throw URLError(.badServerResponse) // Example error
+        }
+        return amiibosToReturn
+    }
+}
+
+// Mock for Local Data Source
+class MockLocalAmiiboDataSource: LocalAmiiboDataSourceProtocol {
+    // Este mock simula el comportamiento de  persistencia para testear el ViewModel..
+    var storedAmiibos: [AmiiboObj] = []
+
+    func insertOrUpdate(amiibos: [Amiibo]) throws {
+        amiibos.forEach { apiAmiibo in
+            if let _ = storedAmiibos.firstIndex(where: { $0.name == apiAmiibo.name }) {
+            } else {
+                let newAmiiboObj = AmiiboObj(amiiboObj: apiAmiibo)
+                storedAmiibos.append(newAmiiboObj)
+            }
+        }
+    }
+
+    func addFavorite(_ amiibo: AmiiboObj) throws {
+        if let index = storedAmiibos.firstIndex(where: { $0.id == amiibo.id }) {
+            storedAmiibos[index].isFavorite = true
+        } else {
+            //Si aun no esta guardado por este mock, agregalo y guardalo como favorito
+            let newAmiiboObj = amiibo
+            newAmiiboObj.isFavorite = true
+            storedAmiibos.append(newAmiiboObj)
+        }
+    }
+
+    func deleteAmiibos(at offsets: IndexSet, in amiibos: [AmiiboObj]) throws {
+        storedAmiibos.remove(atOffsets: offsets)
     }
     
-    func fetchAndPersistAmiibos() async throws {
-        modelContext.insert(mockAmiiboObj)
-    }
-    
-    func addFavorite(_ amiibo: AmiiboObj) {
-        amiibo.isFavorite=true
-    }
-    
-    func deleteAmiibos(at offsets: IndexSet, in amiibos: [AmiiboObj]) {
-        for index in offsets {
-            modelContext.delete(amiibos[index])
+    func deleteFavorite(id: String, in favs: [AmiiboObj]) throws {
+        if let index = storedAmiibos.firstIndex(where: { $0.id == id }) {
+            storedAmiibos.remove(at: index)
         }
     }
     
-    func deleteFavorite(id: String, in favs: [AmiiboObj]) {
-        if let amiiboToDelete = favs.first(where: { $0.id == id }) {
-            modelContext.delete(amiiboToDelete)
-      }
+    func deleteFavorites(at offsets: IndexSet, in favs: [AmiiboObj]) throws {
+        storedAmiibos.remove(atOffsets: offsets)
     }
-    
-    func deleteFavorites(at offsets: IndexSet, in favs: [AmiiboObj]) {
-        for index in offsets {
-            modelContext.delete(favs[index])
-        }
-    }
-    
+
     func getAmiibos(isFavorite: Bool) throws -> [AmiiboObj] {
-        return [mockAmiiboObj]
+        return storedAmiibos.filter { ($0.isFavorite ?? false) == isFavorite }
     }
 }
 

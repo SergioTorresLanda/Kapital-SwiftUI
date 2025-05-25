@@ -9,7 +9,7 @@ import SwiftUI
 import SwiftData
 
 struct ContentView: View {
-    @Environment(\.modelContext) private var modelContext
+    @Environment(\.modelContext) private var modelContext //Capa entre los objetos y la memoria.
     @State private var viewmodel: MyViewModel? //opcional por ser "late init"
     
     var body: some View {
@@ -40,7 +40,7 @@ struct ContentView: View {
                     }
                 }
             }
-        }.task {//async work
+        }.task {//trabajo asyncrono se usará el patrón (async/await) en lugar de completion handlers (@escaping).
             do {
                 try await viewmodel?.fetchData()
             } catch {
@@ -48,7 +48,8 @@ struct ContentView: View {
             }
         }
         .onAppear{
-            if viewmodel == nil { // Inicializar solo una vez todo el esquema del ViewModel usando la variable ambiental "modelContext"
+            if viewmodel == nil { 
+                // Inicializar solo una vez todo el esquema del ViewModel usando la variable ambiental "modelContext"
                 viewmodel = MyViewModel(
                     repository: AmiiboRepository(
                         remoteDataSource: RemoteAmiiboDataSource(),
