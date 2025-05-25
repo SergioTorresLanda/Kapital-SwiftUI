@@ -7,6 +7,8 @@
 
 import Foundation
 
+
+
 struct AmiiboResp: Codable {
     var amiibo: [Amiibo]
 }

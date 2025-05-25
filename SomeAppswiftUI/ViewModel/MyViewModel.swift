@@ -6,60 +6,88 @@
 //
 
 import Foundation
+import SwiftData
+import SwiftUI
 
-final class MyViewModel: ObservableObject {
-    
-    @Published private(set) var cards: [Amiibo] = []
-    @Published private(set) var isLoading = false
+@Observable
+final class MyViewModel {
+
+    private var modelContext: ModelContext //Guarda el contexto. Esta es la capa entre el almacén de persistencia y los objetos en la memoria.
+    private let repository: AmiiboRepositoryProtocol // Injected dependency
+    var amiibos: [AmiiboObj] = [] //data pública guardada localmente
+    var favs: [AmiiboObj] = [] //favoritos guardados localmente
+
+    private(set) var isLoading = false //propiedad para menejar el estado del ActivityIndicator
     let url = URL(string: "https://www.amiiboapi.com/api/amiibo/")
     
-    func deleteCard(at offsets: IndexSet) {
-         cards.remove(atOffsets: offsets)
-         print("Tarjeta eliminada en los índices: \(offsets)")
+    //Se inyecta el contexto al inicializarse el viewmodel
+    init(modelContext: ModelContext, repository:AmiiboRepositoryProtocol) {
+         self.modelContext = modelContext
+         self.repository = repository
+         //fetchAmiibos()
      }
-
-}
-
-class MockDataService: MockDataServiceProtocol {
-    let cards: [Amiibo]
-    init (cards:[Amiibo]?){
-        self.cards = cards ?? []
-    }
     
     func fetchData() async throws {
-        DispatchQueue.main.asyncAfter(deadline: .now() + 3){
-            
+       isLoading = true
+       defer { isLoading = false }
+       try await repository.fetchAndPersistAmiibos()
+       fetchAmiibos() // Refresh ViewModel's lists after persistence
+       fetchFavs()
+   }
+    // MARK: Actualizar la propiedad que vera la vista, usando de la data guardada en local como fuente de verdad.
+    func fetchAmiibos() {
+        do {
+            amiibos = try repository.getAmiibos(isFavorite: false)
+        } catch {
+            print("Fallo la busqueda de Amiibos: \(error.localizedDescription)")
+            amiibos = []
         }
     }
-}
-
-extension MyViewModel : MockDataServiceProtocol {
+    func fetchFavs() {
+        do {
+            favs = try repository.getAmiibos(isFavorite: true)
+        } catch {
+            print("Fallo la busqueda de Favoritos: \(error.localizedDescription)")
+            amiibos = []
+        }
+    }
     
-    func fetchData() async throws {
-        isLoading=true
-        defer { isLoading = false }
-        
-        guard let apiURL = url else {
-            throw URLError(.badURL)
-        }
-        var request = URLRequest(url: apiURL)
-        request.httpMethod = "GET"
-        //request.timeoutInterval = 20 // request config not needed
-        //request.setValue("Bearer \(tksession ?? "")", forHTTPHeaderField: "Authorization")// request config not needed
-        let (data, response) = try await URLSession.shared.data(for: request)
-        // Check response status code
-        guard let httpResponse = response as? HTTPURLResponse,
-              (200...299).contains(httpResponse.statusCode) else {
-            // Could consider creating a more specific error type here
-            throw NSError(domain: "HTTPError", code: (response as? HTTPURLResponse)?.statusCode ?? -1, userInfo: [NSLocalizedDescriptionKey: "Invalid HTTP response"])
-        }
-        
-        let decoder = JSONDecoder()
-        let resp = try decoder.decode(AmiiboResp.self, from: data)
-        self.cards = resp.amiibo
+    // MARK: PERSISTENCIA DE LA DATA REGULAR
+    // Agregar elementos
+    func addItemToSD(with: Amiibo){
+        let item = AmiiboObj(amiiboObj:with)
+        modelContext.insert(item)
+        fetchAmiibos()
     }
-}
+    // Eliminar elementos
+    func deleteAmiibos(at offsets: IndexSet) {
+        for index in offsets {
+            let amiiboToDelete = amiibos[index]
+            modelContext.delete(amiiboToDelete)
+        }
+        fetchAmiibos()
+    }
+    // MARK: PERSISTENCIA DE FAVORITOS
+    //Agregar favoritos
+    func addFavoriteToSD(with amiibo: AmiiboObj){
+        amiibo.isFavorite = true
+        modelContext.insert(amiibo)
+        fetchFavs()
+    }
+    // Eliminar favoritos
+    func deleteFavoriteFromSD(id: String) {
+        guard let index = favs.firstIndex(where: { $0.id==id }) else {return}
+        let amiiboToDelete = favs[index]
+        modelContext.delete(amiiboToDelete)
+        fetchFavs()
+    }
+    
+    func deleteFavoriteFromIndex(at offsets: IndexSet) {
+        for index in offsets {
+            let amiiboToDelete = favs[index]
+            modelContext.delete(amiiboToDelete)
+        }
+        fetchFavs()
+    }
 
-protocol MockDataServiceProtocol {
-    func fetchData() async throws
 }

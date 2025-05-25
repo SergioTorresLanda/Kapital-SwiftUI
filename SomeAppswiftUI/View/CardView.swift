@@ -9,13 +9,16 @@ import Foundation
 import SwiftUI
 
 struct CardView: View {
-    let cardTitle: String
-    let image: String
+    @State var amiibo: AmiiboObj
+    @State var viewmodel: MyViewModel
+    @State private var didTap:Bool = false
+    @State var isInFavoritesList = false
+    
     var body: some View {
         HStack{
-            Text(cardTitle).bold()
+            Text(amiibo.character + " - " + amiibo.amiiboSeries).bold()
             Spacer()
-            AsyncImage(url: URL(string: image)) { image in
+            AsyncImage(url: URL(string: amiibo.image)) { image in
                 image.resizable()
             } placeholder: {
                 Color.red
@@ -23,6 +26,20 @@ struct CardView: View {
             .frame(width: 90, height: 90)
             .clipShape(.rect(cornerRadius: 25))
             Spacer()
+            !isInFavoritesList ? //configure favorite button actions
+            Button{
+                didTap.toggle()
+                saveToOrRemoveFromFavorites()
+            } label: {
+                Image(systemName: "heart.fill")
+            }.background(Color.black)
+                .foregroundColor(didTap ? Color.red : Color.white)
+            :  // is in favorite list, configure static button as Image
+            Button{
+            } label: {
+                Image(systemName: "heart.fill")
+            }.background(Color.black)
+                .foregroundColor(Color.red)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding()
@@ -31,8 +48,12 @@ struct CardView: View {
                                          style: .continuous))
         .listRowSeparator(.hidden)
     }
+    
+    func saveToOrRemoveFromFavorites(){
+        didTap ? viewmodel.addFavoriteToSD(with: amiibo) : viewmodel.deleteFavoriteFromSD(id: amiibo.id)
+    }
 }
-
+/*
 struct CardView_Previews: PreviewProvider {
     static var previews: some View {
         CardView(cardTitle: "Mario - Super Smash", 
@@ -40,4 +61,4 @@ struct CardView_Previews: PreviewProvider {
             .padding()
             .previewLayout(.sizeThatFits)
     }
-}
+}*/

@@ -6,54 +6,80 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct ContentView: View {
-  
-    @StateObject private var viewmodel = MyViewModel()
-      
+    @Environment(\.modelContext) private var modelContext
+    @State private var viewmodel: MyViewModel? //opcional por ser "late init"
+    
     var body: some View {
-            ZStack {
-                if viewmodel.isLoading{
+        ZStack {
+            if let vm = viewmodel {
+                if vm.isLoading{
                     ProgressView()
                 }else{
-                    NavigationView{
-                        List{
-                            ForEach(viewmodel.cards, id: \.tail) { card in
-                                CardView(cardTitle: card.character + " - " + card.amiiboSeries, image: card.image)
-                                    .background(
-                                      NavigationLink("", destination: CardD(card: card))
-                                          .opacity(0)
-                                    )
+                    NavigationView {
+                        VStack{
+                            Spacer()
+                            NavigationLink(destination: FavoritesView(viewmodel: vm)) {
+                                ButtonView()
                             }
-                            .onDelete(perform: viewmodel.deleteCard)
-                            .listRowSeparator(.hidden)
+                            Spacer()
+                            Text("Amiibos:  \(vm.amiibos.count)").bold().font(.largeTitle)
+                            List{
+                                ForEach(vm.amiibos, id: \.id) { card in
+                                    CardView(amiibo: card, viewmodel: vm)
+                                }
+                                .onDelete { indexSet in
+                                    vm.deleteAmiibos(at: indexSet)
+                                }
+                                .listRowSeparator(.hidden)
+                            }
+                            .listStyle(.plain)
                         }
-                        .listStyle(.plain)
-                        .navigationTitle("Amiibo's disponibles")
                     }
                 }
             }
-            .task {//async work
-                do {
-                    try await viewmodel.fetchData()
-                } catch {
-                    print (error)
-                }
+        }
+        .task {//async work
+            do {
+                try await viewmodel?.fetchData()
+            } catch {
+                print (error)
             }
-            .onAppear{
-                //manejar la aparicion de la vista (similar a viewDidAppear en controllers)
+        }
+        .onAppear{
+            // Initialize ViewModel here using the environment's modelContext
+            if viewmodel == nil { // Initialize only once
+                viewmodel = MyViewModel(modelContext: modelContext)
             }
-            .onDisappear{
-                //manejar la desaparicion de la vista (similar a viewDidDissapear en controllers)
-            }
-            // 6. React specifically to the state change we care about
-              // .onChange(of: appState.isInBackground) { wasInBackground, nowInBackground in
-                   // handleBackgroundStateChange(isEnteringBackground: nowInBackground)
-               //}
+        }
+        .onDisappear{
+            //manejar la desaparicion de la vista (similar a viewDidDissapear en controllers)
         }
     }
+}
 
+
+struct ButtonView: View {
+    var body: some View {
+        Text("Favoritos").font(.title)
+            .frame(width: 150, height: 50, alignment: .center)
+            .background(Color.red)
+            .foregroundColor(Color.white)
+            .border(.red, width: 5)
+            .cornerRadius(25)
+    }
+}
 
 #Preview {
-    ContentView()
+    do {
+        let config = ModelConfiguration(isStoredInMemoryOnly: true)
+        let container = try ModelContainer(for: AmiiboObj.self, configurations: config)
+        return ContentView()
+            .modelContainer(container)
+    } catch {
+        fatalError("Failed to create ModelContainer for preview: \(error)")
+    }
 }
+

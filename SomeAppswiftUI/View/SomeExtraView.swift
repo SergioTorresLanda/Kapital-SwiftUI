@@ -9,7 +9,8 @@ import Foundation
 import SwiftUI
 
 struct CardD: View {
-    let card: Amiibo
+    let card: AmiiboObj
+    
     var body: some View {
         ScrollView{
             VStack(alignment: .leading) {
@@ -34,7 +35,7 @@ private extension CardD{
     
     var info: some View {
         VStack(alignment: .leading, spacing: 12){
-            Text("Info").bold()
+            Text("Información").bold()
             Text(card.amiiboSeries)
             Text(card.character)
             Text(card.gameSeries)
@@ -44,7 +45,7 @@ private extension CardD{
     var info2: some View {
         HStack{
             VStack(alignment: .leading, spacing: 12){
-                Text("Category").bold()
+                Text("Gráficos").bold()
                 Text(card.head)
           
                 Text(card.name)
@@ -56,11 +57,11 @@ private extension CardD{
     }
     var release: some View {
         VStack(alignment: .leading, spacing: 12){
-            Text("Release:").bold()
-            Text(card.release.au ?? "")
-            Text(card.release.jp ?? "")
-            Text(card.release.eu ?? "")
-            Text(card.release.na ?? "")
+            Text("Releases").bold()
+            Text("au:" + (card.release.au ?? ""))
+            Text("jp:" + (card.release.jp ?? ""))
+            Text("eu:" + (card.release.eu ?? ""))
+            Text("na:" + (card.release.na ?? ""))
         }
     }
 }
