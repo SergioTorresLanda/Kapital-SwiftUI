@@ -1,7 +1,10 @@
 #Prueba Técnica - Kapital Bank
 
-##Ver la grabación publica del flujo completo:   
+##Véase la grabación publica del flujo completo: 
+Comportsmiento online:   
 https://drive.google.com/file/d/1Qfp_YueWafyKrqDPeYTGzd15u5RYAA2s/view?usp=sharing
+Comportamiento offline: 
+https://drive.google.com/file/d/1gI4wRJ6hm9oCBP4w6IT_0stX7LZ6aRRT/view?usp=sharing
 
 -App de iOS moderna creada con SwiftUI, centrada en una arquitectura robusta, persistencia de datos y pruebas integrales.
 -Esta aplicación permite a los usuarios explorar una colección de figuras Amiibo obtenidas de una API externa, ver sus detalles y administrar una lista de sus Amiibo favoritos usando almacenamiento local.
